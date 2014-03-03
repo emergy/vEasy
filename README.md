@@ -20,8 +20,8 @@ Design Principals
 * vEasy is generic
 * No additional Perl packages required (addition to VMware vSphere SDK for Perl requirements)
 * Using vEasy framework does not prevent usage of VMware vSphere API in other ways not defined in vEasy: 
---* vEasy can be easily integrated to existing products.
---* vEasy can be used as a base for more complex products.
+··* vEasy can be easily integrated to existing products.
+··* vEasy can be used as a base for more complex products.
 * Centralized Fault Management
 
 
