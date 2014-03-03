@@ -40,13 +40,16 @@ Documentation
 
 Before you start to use vEasy it is recommended that you read VMware vSphere SDK for Perl programming guide (check the link below) to get the basic knowledge about VMware vSphere API and terminology used in it. 
 
-vEasy Documentation
+#####vEasy Documentation
 https://github.com/aaremiz/vEasy/wiki
 
-VMware vSphere API Reference:
+#####vEasy Examples
+https://github.com/aaremiz/vEasy-Examples
+
+#####VMware vSphere API Reference:
 https://www.vmware.com/support/developer/vc-sdk/
  
-VMware vSphere SDK for Perl Documentation:
+#####VMware vSphere SDK for Perl Documentation:
 https://www.vmware.com/support/developer/viperltoolkit/
 
 License
