@@ -11,18 +11,18 @@ vEasy is still incomplete and not extensively tested. You should not run it in p
 Design Principals
 -----------------
 
-- To easy management/automation/data collection of/from VMware vSphere Infrastructure.
-- VMware vSphere automation without in-depth knowledge about the vSphere API.
-- Mimimum amount of parameters in each function
-- Function parameters are only names (string), numbers (int) or vEasy objects
-- Every function has a return value
-- Function return values are only (if possible) booleans, strings, numbers or vEasy objects. Not vSphere API objects etc.
-- vEasy is generic
-- No additional Perl packages required (addition to VMware vSphere SDK for Perl requirements)
-- Using vEasy framework does not prevent usage of VMware vSphere API in other ways not defined in vEasy: 
+* To easy management/automation/data collection of/from VMware vSphere Infrastructure.
+* VMware vSphere automation without in-depth knowledge about the vSphere API.
+* Mimimum amount of parameters in each function
+* Function parameters are only names (string), numbers (int) or vEasy objects
+* Every function has a return value
+* Function return values are only (if possible) booleans, strings, numbers or vEasy objects. Not vSphere API objects etc.
+* vEasy is generic
+* No additional Perl packages required (addition to VMware vSphere SDK for Perl requirements)
+* Using vEasy framework does not prevent usage of VMware vSphere API in other ways not defined in vEasy: 
 --* vEasy can be easily integrated to existing products.
 --* vEasy can be used as a base for more complex products.
-- Centralized Fault Management
+* Centralized Fault Management
 
 
 Tested with
