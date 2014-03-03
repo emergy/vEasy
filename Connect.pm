@@ -229,6 +229,12 @@ sub getHostSystem
 	return vEasy::HostSystem->new($self, $arg);	
 }
 
+sub getNetwork
+{
+	my ($self, $arg) = @_;		
+	return vEasy::Network->new($self, $arg);	
+}
+
 sub getResourcePool
 {
 	my ($self, $arg) = @_;		
