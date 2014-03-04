@@ -8,6 +8,8 @@ vEasy is automation framework for VMware vSphere infrastructure. It utilizes the
 
 vEasy is still incomplete and not extensively tested. You should not run it in production systems yet.
 
+See [Documentation](https://github.com/aaremiz/vEasy/wiki/) and [Quick Start Guide](https://github.com/aaremiz/vEasy/wiki/QuickStartGuide) for more info.
+
 Design Principals
 -----------------
 
