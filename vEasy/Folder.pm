@@ -355,7 +355,18 @@ sub createDatastoreCluster
 {
 	my ($self, $name) = @_;
 	
-	return 0;
+	my $folder = 0;
+	eval
+	{
+		$folder = $self->getView()->CreateStoragePod(name => $name);
+	};
+	my $fault = vEasy::Fault->new($@);
+	if( $fault )
+	{
+		$self->addFault($fault);
+		return 0;
+	}	
+	return vEasy::DatastoreCluster->new($self->vim(), $folder);
 }
 
 sub createDistributedVirtualSwitch
