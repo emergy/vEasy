@@ -177,9 +177,9 @@ sub getParent
 		{
 			return vEasy::Folder->new($self->vim(), $parent);
 		}
-		elsif( $parent->type eq "StoragePod" )
+		elsif( $parent->type eq "DatastoreCluster" )
 		{
-			return vEasy::StoragePod->new($self->vim(), $parent);
+			return vEasy::DatastoreCluster->new($self->vim(), $parent);
 		}
 		elsif( $parent->type eq "ResourcePool" )
 		{

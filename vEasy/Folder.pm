@@ -145,9 +145,9 @@ sub getChildEntities
 			{
 				push(@return, vEasy::Datastore->new($self->vim(), $childs->[$i]));
 			}
-			elsif( $child_type eq "StoragePod" )
+			elsif( $child_type eq "DatastoreCluster" )
 			{
-				push(@return, vEasy::StoragePod->new($self->vim(), $childs->[$i]));
+				push(@return, vEasy::DatastoreCluster->new($self->vim(), $childs->[$i]));
 			}
 			else
 			{

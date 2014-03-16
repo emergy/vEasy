@@ -68,13 +68,13 @@ use vEasy::Cluster;
 use vEasy::CustomValuesManager;
 use vEasy::Datacenter;
 use vEasy::Datastore;
+use vEasy::DatastoreCluster;
 use vEasy::DistributedVirtualPortgroup;
 use vEasy::DistributedVirtualSwitch;
 use vEasy::Fault;
 use vEasy::HostSystem;
 use vEasy::HostSystemNetworkManager;
 use vEasy::StandardVirtualSwitch;
-use vEasy::StoragePod;
 use vEasy::Task;
 use vEasy::VirtualApp;
 use vEasy::VirtualMachine;
@@ -205,6 +205,12 @@ sub getDatastore
 	return vEasy::Datastore->new($self, $arg);	
 }
 
+sub getDatastoreCluster
+{
+	my ($self, $arg) = @_;		
+	return vEasy::DatastoreCluster->new($self, $arg);	
+}
+
 sub getDistributedVirtualPortgroup
 {
 	my ($self, $arg) = @_;		
@@ -239,12 +245,6 @@ sub getResourcePool
 {
 	my ($self, $arg) = @_;		
 	return vEasy::ResourcePool->new($self, $arg);	
-}
-
-sub getStoragePod
-{
-	my ($self, $arg) = @_;		
-	return vEasy::StoragePod->new($self, $arg);	
 }
 
 sub getVirtualApp
