@@ -298,7 +298,7 @@ sub setStorageDrsAutomationLevelToAutomated
 	return $self->configure($spec);
 }
 
-sub setVirtualMachineMigrationModeToManual
+sub setStorageDrsAutomationLevelToManual
 {
 	my ($self) = @_;
 	
