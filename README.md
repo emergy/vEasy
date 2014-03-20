@@ -29,13 +29,13 @@ Design Principals
 
 Tested with
 -----------
-- vMA 5.1 update 2
-- vMA 5.5.0b
+- vMA 5.1.0
+- vMA 5.5.0
 - VMware vSphere SDK for Perl 5.1 + CentOS 6.5
-- vCenter 5.1 update 2
-- vCenter 5.5.0b
-- ESXi 5.1
-- ESXi 5.5
+- vCenter 5.1
+- vCenter 5.5 (update 1 also)
+- ESXi 5.1 
+- ESXi 5.5 (update 1 also)
 
 Documentation
 ---------------

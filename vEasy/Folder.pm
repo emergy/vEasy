@@ -399,5 +399,4 @@ sub moveEntityToFolder
 	return 0;
 }
 
-
 1;

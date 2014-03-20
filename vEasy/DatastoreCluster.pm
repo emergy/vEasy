@@ -88,7 +88,7 @@ sub getTotalCapacity
 
 	if( $self->getView()->summary )
 	{
-		return $self->getView()->summary->capacity/1024/1024;
+		return int($self->getView()->summary->capacity/1024/1024);
 	}
 	$self->addCustomFault("Capacity information not available.");
 	return 0;
@@ -100,7 +100,7 @@ sub getFreeCapacity
 
 	if( $self->getView()->summary )
 	{
-		return $self->getView()->summary->freeSpace/1024/1024;
+		return int($self->getView()->summary->freeSpace/1024/1024);
 	}
 	$self->addCustomFault("Capacity information not available.");	
 	return 0;
@@ -216,12 +216,13 @@ sub getStorageDrsAutomationLevel
 
 sub addDatastore
 {
-	my ($self) = @_;
-}
-
-sub removeDatastore
-{
-	my ($self) = @_;
+	my ($self, $ds) = @_;
+	
+	if( $ds->isa("vEasy::Datastore") )
+	{
+		return $self->moveEntityToFolder($ds);
+	}
+	return 0;
 }
 
 sub configure
@@ -380,3 +381,5 @@ sub setIoLoadImbalanceThreshold
 	
 	return $self->configure($spec);
 }
+
+1;

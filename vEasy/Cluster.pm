@@ -424,10 +424,10 @@ sub addHost
 			$fingerprint = $1; 
 			my $connect_spec = HostConnectSpec->new(force => 0, hostName => $address, userName => $username, password => $password, sslThumbprint => $fingerprint );
 			
-			my $task = 0;
+			my $host = 0;
 			eval
 			{
-				$task = vEasy::Task->new($self, $self->getView()->AddHost_Task(spec => $connect_spec, asConnected => 1));
+				$host = $self->getView()->AddHost(spec => $connect_spec, asConnected => 1);
 			};
 			
 			my $fault = vEasy::Fault->new($@);
@@ -436,15 +436,29 @@ sub addHost
 				$self->addFault($fault);
 				return 0;
 			}
+			return vEasy::HostSystem->new($self->vim(), $host);
+			# my $task = 0;
+			# eval
+			# {
+				# $task = $self->getView()->AddHost_Task(spec => $connect_spec, asConnected => 1);
+			# };
+			# $task = vEasy::Task->new($self, $task);
+			
+			# my $fault = vEasy::Fault->new($@);
+			# if( $fault )
+			# {
+				# $self->addFault($fault);
+				# return 0;
+			# }
 
-			if( $task->completedOk() )
-			{
-				return vEasy::HostSystem->new($self->vim(), $address);
-			}
-			else
-			{
-				$self->addCustomFault("Adding host to cluster failed.");
-			}
+			# if( $task->completedOk() )
+			# {
+				# return vEasy::HostSystem->new($self->vim(), $address);
+			# }
+			# else
+			# {
+				# $self->addCustomFault("Adding host to cluster failed.");
+			# }
 		}
 		else
 		{
