@@ -521,6 +521,36 @@ sub createVirtualMachine
 	return 0;
 }
 
+sub createVirtualApp
+{
+	my ($self, $name, $folder) = @_;
+	
+	if( $self->vim()->checkIfConnectedToHost() )
+	{
+		$folder = $self->vim()->getRootFolder()->getChildEntities()->[0]->getVmFolder();
+	}
+	
+	my $rp = $self->getRootResourcePool();
+	
+	my $cluster = $self->getCluster();
+	if( $cluster )
+	{
+		$rp = $cluster->getRootResourcePool();
+	}
+
+	my $vm = $rp->createVirtualApp($name, $folder);
+	
+	if( $vm )
+	{
+		return $vm;
+	}
+	else
+	{
+		$self->addFault($rp->getLatestFault());
+	}
+	return 0;
+}
+
 # ============================================================================================
 # Storage Operations
 # ============================================================================================

@@ -501,6 +501,21 @@ sub createVirtualMachine
 	return 0;
 }
 
+sub createVirtualApp
+{
+	my ($self, $name, $folder) = @_;
+	
+	my $rp = $self->getRootResourcePool();
+	my $vm = $rp->createVirtualApp($name, $folder);
+	
+	if( $vm )
+	{
+		return $vm;
+	}
+	$self->addFault($rp->getLatestFault());
+	return 0;
+}
+
 sub rescanStorageDevices
 {
 	my ($self) = @_;

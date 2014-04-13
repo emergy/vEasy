@@ -335,6 +335,35 @@ sub createVirtualMachine
 	return 0;
 }
 
+sub createVirtualApp
+{
+	my ($self, $name, $folder) = @_;
+	
+	if( $folder->isa("vEasy::Folder") )
+	{
+		my $shares = SharesInfo->new(level=>SharesLevel->new('normal'), shares => 0);
+		my $allocinfo = ResourceAllocationInfo->new(limit => -1, expandableReservation => 1, reservation => 0, shares => $shares);										
+		my $resource_spec = ResourceConfigSpec->new( cpuAllocation => $allocinfo, memoryAllocation => $allocinfo);	
+		
+		my $vapp_spec = VAppConfigSpec->new();
+		
+		my $vapp = 0;
+		eval
+		{
+			$vapp = $self->getView()->CreateVApp(name => $name, resSpec => $resource_spec, configSpec => $vapp_spec, vmFolder => $folder->getView());
+		};
+		my $fault = vEasy::Fault->new($@);
+		if( $fault )
+		{
+			$self->addFault($fault);
+			return 0;
+		}		
+		return vEasy::VirtualApp->new($self->vim(), $vapp);
+	}
+	$self->addCustomFault("Invalid function argument.");
+	return 0;	
+}
+
 sub moveEntityToResourcePool
 {
 	my ($self, $entity) = @_;
