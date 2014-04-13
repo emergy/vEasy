@@ -223,10 +223,10 @@ sub createVirtualMachine
 		
 		my $vm_conf_spec = VirtualMachineConfigSpec->new(name => $name, numCPUs => 1, numCoresPerSocket => 1, memoryMB => 32, files => $files_info, guestId => "winNetStandardGuest");	
 		
-		my $task = 0;
+		my $vm = 0;
 		eval
 		{
-			$task = vEasy::Task->new($self, $self->getView()->CreateVM_Task(config => $vm_conf_spec, pool => $rp->getView()));
+			$vm = $self->getView()->CreateVM(config => $vm_conf_spec, pool => $rp->getView());
 		};
 		my $fault = vEasy::Fault->new($@);
 		if( $fault )
@@ -235,20 +235,7 @@ sub createVirtualMachine
 			return 0;
 		}
 		
-		if( $task->completedOk() )
-		{
-			$self->refresh();
-			return $self->checkIfSubEntityExists($name);
-		}
-		else
-		{
-			$fault = vEasy::Fault->new($task->getFault());
-			if( $fault )
-			{
-				$self->addFault($fault);
-				return 0;
-			}			
-		}
+		return vEasy::VirtualMachine->new($self->vim(), $vm);
 	}
 	$self->addCustomFault("Invalid function arguments.");
 	return 0;
