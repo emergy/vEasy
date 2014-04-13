@@ -589,14 +589,14 @@ sub setChildShutdownDelay
 
 sub enableWaitForToolsRunning
 {
-	my ($self, $entity, $delay) = @_;
+	my ($self, $entity) = @_;
 	
 	return $self->configureChildSpecs($entity, "waitingForGuest", 1);
 }
 
 sub disableWaitForToolsRunning
 {
-	my ($self, $entity, $delay) = @_;
+	my ($self, $entity) = @_;
 	
 	return $self->configureChildSpecs($entity, "waitingForGuest", 0);
 }
