@@ -66,7 +66,7 @@ sub new
 {
 	my ($class, $vim, $arg) = @_;
 	
-	my $self = $class->SUPER::new($vim, $arg, "DistributedVirtualSwitch" );
+	my $self = $class->SUPER::new($vim, $arg, "VmwareDistributedVirtualSwitch" );
 	
 	bless ($self, $class);
 	return $self;
@@ -79,9 +79,64 @@ sub DESTROY
 	
 }
 
+sub getHosts
+{
+	my ($self) = @_;
+}
+
+sub getVirtualMachines
+{
+	my ($self) = @_;
+}
+
+sub getDistributedVirtualPortgroups
+{
+	my ($self) = @_;
+}
+
+sub getUsedVlans
+{
+	my ($self) = @_;
+}
+
 sub getUuid
 {
 	my ($self) = @_;
 	
 	return $self->getView()->uuid;
+}
+
+sub createDistributedVirtualPortgroup
+{
+	my ($self) = @_;
+}
+
+sub createNetworkResourcePool
+{
+	my ($self) = @_;
+}
+
+sub removeNetworkResourcePool
+{
+	my ($self) = @_;
+}
+
+sub enableNetworkIoControl
+{
+	my ($self) = @_;
+}
+
+sub disableNetworkIoControl
+{
+	my ($self) = @_;
+}
+
+sub configure
+{
+	my ($self) = @_;
+}
+
+sub updateDvsConfigsToHost
+{
+	my ($self) = @_;
 }

@@ -242,7 +242,14 @@ sub getChildResourcePools
 	{
 		for(my $i = 0; $i < scalar @{$self->getView()->resourcePool}; ++$i)
 		{
-			push(@pools, vEasy::ResourcePool->new($self->vim(), $self->getView()->resourcePool->[$i])); 
+			if( $self->getView()->resourcePool->[$i]->type eq "VirtualApp" )
+			{
+				push(@pools, vEasy::VirtualApp->new($self->vim(), $self->getView()->resourcePool->[$i]));
+			}
+			else
+			{
+				push(@pools, vEasy::ResourcePool->new($self->vim(), $self->getView()->resourcePool->[$i]));
+			}
 		}
 	}
 	return \@pools;

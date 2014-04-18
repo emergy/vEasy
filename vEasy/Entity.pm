@@ -64,7 +64,7 @@ sub new
 {
 	my ($class, $vim, $arg, $type) = @_;
 
-	my $self = {vim => $vim, view => 0, type => $type, faults => [], tasks => [] };	
+	my $self = {vim => $vim, moref => 0, view => 0, type => $type, faults => [], tasks => [] };	
 	
 	if( $vim->isa("vEasy::Connect") )
 	{
@@ -83,12 +83,11 @@ sub new
 		}
 		elsif( $arg->isa("ManagedObjectReference") )
 		{
-			my $view = $vim->getViewFromMoRef($arg);
-
-			if( $view->isa($type) )
+			if( $arg->{type} eq $type )
 			{
-				$self->{view} = $view;
+				$self->{moref} = $arg;
 			}
+
 			else
 			{
 				$vim->addCustomFault("Invalid Entity Type in ManagedObjectReference.");
@@ -125,7 +124,7 @@ sub DESTROY
 sub name
 {
 	my ($self) = @_;
-	return $self->{view}->name;
+	return $self->getView()->name;
 }	
 
 sub vim
@@ -143,6 +142,11 @@ sub getType
 sub getView
 {
 	my ($self) = @_;
+	
+	if( not $self->{view} )
+	{
+		$self->{view} = $self->vim()->getViewFromMoRef($self->{moref});
+	}
 	return $self->{view};
 }
 
@@ -156,13 +160,13 @@ sub getInventoryPath
 sub getManagedObjectReference
 {
 	my ($self) = @_;
-	return $self->{view}->{mo_ref};
+	return $self->getView()->{mo_ref};
 }
 
 sub getManagedObjectId
 {
 	my ($self) = @_;
-	return $self->{view}->{mo_ref}->value;
+	return $self->getView()->{mo_ref}->value;
 }
 
 sub getParent
@@ -220,7 +224,7 @@ sub remove
 	my $task = 0;
 	eval
 	{
-		$task = $self->{view}->Destroy_Task();
+		$task = $self->getView()->Destroy_Task();
 	};
 	my $fault = vEasy::Fault->new($@);
 	if( $fault )
@@ -238,7 +242,7 @@ sub rename
 	my $task = 0;
 	eval
 	{
-		$task  = $self->{view}->Rename_Task(newName => $newname);
+		$task  = $self->getView()->Rename_Task(newName => $newname);
 	};
 	my $fault = vEasy::Fault->new($@);
 	if( $fault )
@@ -255,7 +259,7 @@ sub reload
 	
 	eval
 	{
-		$self->{view}->Reload();	
+		$self->getView()->Reload();	
 	};
 	my $fault = vEasy::Fault->new($@);
 	if( $fault )

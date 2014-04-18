@@ -98,7 +98,14 @@ sub getNetworks
 	{
 		for(my $i = 0; $i < scalar @{$self->getView()->network}; ++$i)
 		{
-			push(@networks, vEasy::Network->new($self->vim(), $self->getView()->network->[$i])); 
+			if( $self->getView()->network->[$i]->type eq "DistributedVirtualPortgroup" )
+			{
+				push(@networks, vEasy::DistributedVirtualPortgroup->new($self->vim(), $self->getView()->network->[$i])); 
+			}
+			else
+			{
+				push(@networks, vEasy::Network->new($self->vim(), $self->getView()->network->[$i]));
+			}
 		}
 	}
 	return \@networks;
