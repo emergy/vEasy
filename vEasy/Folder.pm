@@ -360,7 +360,20 @@ sub createDistributedVirtualSwitch
 {
 	my ($self, $name) = @_;
 	
-	return 0;
+	my $dvs = 0;
+	my $config_spec = VMwareDVSConfigSpec->new(name => $name);
+	my $create_spec = DVSCreateSpec->new(configSpec => $config_spec);
+	eval
+	{
+		$dvs = $self->getView()->CreateDVS(spec => $create_spec);
+	};
+	my $fault = vEasy::Fault->new($@);
+	if( $fault )
+	{
+		$self->addFault($fault);
+		return 0;
+	}	
+	return vEasy::DistributedVirtualSwitch->new($self->vim(), $dvs);
 }
 
 sub moveEntityToFolder

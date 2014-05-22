@@ -82,21 +82,118 @@ sub DESTROY
 sub getHosts
 {
 	my ($self) = @_;
+	
+	my @hostsystems = ();
+	
+	if( $self->getView()->summary->hostMember )
+	{	
+		for(my $i = 0; $i < scalar @{$self->getView()->summary->hostMember}; ++$i)
+		{
+			push(@hostsystems, vEasy::HostSystem->new($self->vim(), $self->getView()->summary->hostMember->[$i])); 
+		}
+	}
+	return \@hostsystems;
 }
 
 sub getVirtualMachines
 {
 	my ($self) = @_;
+
+	my @vms = ();
+	
+	if( $self->getView()->summary->vm )
+	{
+		for(my $i = 0; $i < scalar @{$self->getView()->summary->vm}; ++$i)
+		{
+			push(@vms, vEasy::VirtualMachine->new($self->vim(), $self->getView()->summary->vm->[$i])); 
+		}
+	}
+	return \@vms;
 }
 
 sub getDistributedVirtualPortgroups
 {
 	my ($self) = @_;
+	
+	my @dvportgroups = ();
+	
+	if( $self->getView()->portgroup )
+	{
+		for(my $i = 0; $i < scalar @{$self->getView()->portgroup}; ++$i)
+		{
+			push(@dvportgroups, vEasy::DistributedVirtualPortgroup->new($self->vim(), $self->getView()->portgroup->[$i])); 
+		}
+	}
+	return \@dvportgroups;
 }
 
-sub getUsedVlans
+sub getContactPersonName
 {
 	my ($self) = @_;
+	
+	if( $self->getView()->config->contact->name )
+	{
+		return $self->getView()->config->contact->name;
+	}
+	$self->addCustomFault("Entity parameter is not available - contact name.");
+	return 0;
+}
+
+sub getContactInformation
+{
+	my ($self) = @_;
+	
+	if( $self->getView()->config->contact->contact )
+	{
+		return $self->getView()->config->contact->contact;
+	}
+	$self->addCustomFault("Entity parameter is not available - contact information.");
+	return 0;
+}
+
+sub getNotes
+{
+	my ($self) = @_;
+	
+	if( $self->getView()->summary->description )
+	{
+		return $self->getView()->summary->description;
+	}
+	$self->addCustomFault("Entity parameter is not available - description.");
+	return 0;
+}
+
+sub getPortAmount
+{
+	my ($self) = @_;
+
+	return $self->getView()->config->numPorts;
+}
+
+sub getMaxPortAmount
+{
+	my ($self) = @_;
+
+	return $self->getView()->config->maxPorts;
+}
+
+sub getVersion
+{
+	my ($self) = @_;
+	
+	if( $self->getView()->config->productInfo->version)
+	{
+		return $self->getView()->config->productInfo->version;
+	}
+	$self->addCustomFault("Entity parameter is not available - version.");
+	return 0;
+}
+
+sub getCreationDate
+{
+	my ($self) = @_;
+
+	return $self->getView()->config->createTime;
 }
 
 sub getUuid
@@ -106,37 +203,369 @@ sub getUuid
 	return $self->getView()->uuid;
 }
 
-sub createDistributedVirtualPortgroup
+sub isNetworkIoControlEnabled
 {
 	my ($self) = @_;
+	
+	return $self->getView()->config->networkResourceManagementEnabled;
 }
+
+sub getUsedVlans
+{
+	my ($self) = @_;
+	
+	my $vlans = [];
+	eval
+	{
+		$vlans = $self->getView()->QueryUsedVlanIdInDvs();
+	};
+	my $fault = vEasy::Fault->new($@);
+	if( $fault )
+	{
+		$self->addFault($fault);
+		return 0;
+	}
+	return $vlans;
+}
+
+sub checkIfHostIsMemberOfTheDvs
+{
+	my ($self, $host) = @_;
+	
+	my $hosts = $self->getView()->config->host;
+	
+	if( $hosts )
+	{
+		for(my $i = 0; $i < @$hosts; ++$i)
+		{
+			my $member = $hosts->[$i]->config->host;
+			
+			if( $member->value eq $host->getManagedObjectId() )
+			{
+				return $hosts->[$i]->config;
+			}
+		}
+	}
+	return 0;
+}
+
+sub checkIfHostPhysicalNicIsAddedToTheDvs
+{
+	my ($self, $host, $vmnic) = @_;
+	
+	my $member = $self->checkIfHostIsMemberOfTheDvs($host);
+	if( $member )
+	{
+		my $pnic_spec = $member->backing->pnicSpec;
+		
+		if( $pnic_spec )
+		{
+			for(my $i = 0; $i < @$pnic_spec; ++$i)
+			{
+				if( $pnic_spec->[$i]->pnicDevice eq $vmnic )
+				{
+					return 1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+sub createDistributedVirtualPortgroup
+{
+	my ($self, $name) = @_;
+	
+	my $dvportgroup = 0;
+	my $spec = DVPortgroupConfigSpec->new(name => $name, type => "earlyBinding", numPorts => 128);
+	eval
+	{
+		$dvportgroup = $self->getView()->CreateDVPortgroup(spec => $spec);
+	};
+	my $fault = vEasy::Fault->new($@);
+	if( $fault )
+	{
+		$self->addFault($fault);
+		return 0;
+	}	
+	return vEasy::DistributedVirtualPortgroup->new($self->vim(), $dvportgroup);
+}
+
 
 sub createNetworkResourcePool
 {
-	my ($self) = @_;
+	my ($self, $name) = @_;
+	
+	my $spec = DVSNetworkResourcePoolConfigSpec->new(name => $name, key => 0);
+	eval
+	{
+		$self->getView()->AddNetworkResourcePool(configSpec => [$spec]);
+	};
+	my $fault = vEasy::Fault->new($@);
+	if( $fault )
+	{
+		$self->addFault($fault);
+		return 0;
+	}	
+	return 1;
 }
 
 sub removeNetworkResourcePool
 {
-	my ($self) = @_;
+	my ($self, $name) = @_;
+
+	my $key = undef;
+	my $nrp = $self->getView()->networkResourcePool;
+	for(my $i = 0; $i < @$nrp; ++$i)
+	{
+		if( $nrp->[$i]->name eq $name )
+		{
+			$key = $nrp->[$i]->key;
+		}
+	}
+	
+	if( $key )
+	{
+		eval
+		{
+			$self->getView()->RemoveNetworkResourcePool(key => [$key]);
+		};
+		my $fault = vEasy::Fault->new($@);
+		if( $fault )
+		{
+			$self->addFault($fault);
+			return 0;
+		}	
+		return 1;
+	}
+	$self->addCustomFault("Network resource pool not found - $name");
+	return 0;
 }
 
 sub enableNetworkIoControl
 {
 	my ($self) = @_;
+	
+	eval
+	{
+		$self->getView()->EnableNetworkResourceManagement(enable => 1);
+	};
+	my $fault = vEasy::Fault->new($@);
+	if( $fault )
+	{
+		$self->addFault($fault);
+		return 0;
+	}	
+	return 1;
 }
 
 sub disableNetworkIoControl
 {
 	my ($self) = @_;
+
+	eval
+	{
+		$self->getView()->EnableNetworkResourceManagement(enable => 0);
+	};
+	my $fault = vEasy::Fault->new($@);
+	if( $fault )
+	{
+		$self->addFault($fault);
+		return 0;
+	}	
+	return 1;
+}
+
+sub updateDvsConfigsToHosts
+{
+	my ($self) = @_;
+	
+	if( scalar @{$self->getHosts()} > 0 )
+	{
+		my $dvs_manager = $self->vim()->getViewFromMoRef($self->vim()->getServiceContent()->dvSwitchManager);
+		my $task = 0;
+		eval
+		{
+			$task = $dvs_manager->RectifyDvsOnHost_Task(hosts => $self->getView()->summary->hostMember);
+		};
+		my $fault = vEasy::Fault->new($@);
+		if( $fault )
+		{
+			$self->addFault($fault);
+			return 0;
+		}	
+		return vEasy::Task->new($self, $task);
+	}
+	$self->addCustomFault("No hosts defined in this DVS.");
+	return 0;
 }
 
 sub configure
 {
-	my ($self) = @_;
+	my ($self, $spec) = @_;
+
+	if( $spec->isa("VMwareDVSConfigSpec") )
+	{
+		$self->refresh();
+		$spec->{configVersion} = $self->getView()->config->configVersion;
+		
+		my $task = 0;
+		eval
+		{
+			$task = $self->getView()->ReconfigureDvs_Task(spec => $spec);
+		};
+		my $fault = vEasy::Fault->new($@);
+		if( $fault )
+		{
+			$self->addFault($fault);
+			return 0;
+		}
+		return vEasy::Task->new($self, $task);
+	}
+	$self->addCustomFault("Invalid function argument - spec");
+	return 0;
 }
 
-sub updateDvsConfigsToHost
+sub setNotes
 {
-	my ($self) = @_;
+	my ($self, $notes) = @_;
+	
+	my $spec = VMwareDVSConfigSpec->new(description => $notes);
+	
+	return $self->configure($spec);
 }
+
+sub setContactPersonName
+{
+	my ($self, $name) = @_;
+	
+	my $contactinfo = $self->getView()->config->contact;
+	$contactinfo->{name} = $name;
+
+	my $spec = VMwareDVSConfigSpec->new(contact => $contactinfo);
+	
+	return $self->configure($spec);
+}
+
+sub setContactInformation
+{
+	my ($self, $information) = @_;
+	
+	my $contactinfo = $self->getView()->config->contact;
+	$contactinfo->{contact} = $information;
+
+	my $spec = VMwareDVSConfigSpec->new(contact => $contactinfo);
+	
+	return $self->configure($spec);
+}
+
+sub addHostToDvs
+{
+	my ($self, $host) = @_;
+	
+	if( $host->isa("vEasy::HostSystem") )
+	{		
+		my $pnic_backing = DistributedVirtualSwitchHostMemberPnicBacking->new();
+
+		my $member_config_spec = DistributedVirtualSwitchHostMemberConfigSpec->new(backing => $pnic_backing, host => $host->getView(), operation => "add");		
+		
+		my $spec = VMwareDVSConfigSpec->new(host => [$member_config_spec]);
+		
+		return $self->configure($spec);
+	}
+	$self->addCustomFault("Invalid function argument - host");	
+	return 0;
+}
+
+sub removeHostFromDvs
+{
+	my ($self, $host) = @_;
+	
+	if( $host->isa("vEasy::HostSystem") )
+	{		
+		my $pnic_backing = DistributedVirtualSwitchHostMemberPnicBacking->new();
+
+		my $member_config_spec = DistributedVirtualSwitchHostMemberConfigSpec->new(backing => $pnic_backing, host => $host->getView(), operation => "remove");		
+		
+		my $spec = VMwareDVSConfigSpec->new(host => [$member_config_spec]);
+		
+		return $self->configure($spec);
+	}
+	$self->addCustomFault("Invalid function argument - host");	
+	return 0;
+}
+
+sub addHostPhysicalNicToDvs
+{
+	my ($self, $host, $vmnic) = @_;
+	
+	if( $host->isa("vEasy::HostSystem") )
+	{
+		my $member = $self->checkIfHostIsMemberOfTheDvs($host);
+		if( $member )
+		{
+			my $pnic_spec = DistributedVirtualSwitchHostMemberPnicSpec->new(pnicDevice => $vmnic);
+				
+			my $pnic_specs = [$pnic_spec];
+			
+			if( $member->backing )
+			{
+				if( $member->backing->pnicSpec )
+				{
+					$pnic_specs = $member->backing->pnicSpec;
+					push(@$pnic_specs, $pnic_spec);
+				}
+			}
+
+			my $pnic_backing = DistributedVirtualSwitchHostMemberPnicBacking->new(pnicSpec => $pnic_specs);
+
+			my $member_config_spec = DistributedVirtualSwitchHostMemberConfigSpec->new(backing => $pnic_backing, host => $host->getView(), operation => "edit");		
+			
+			my $spec = VMwareDVSConfigSpec->new(host => [$member_config_spec]);
+			
+			return $self->configure($spec);
+		}
+	$self->addCustomFault("Host is not a member in this DVS.");	
+	return 0;		
+	}
+	$self->addCustomFault("Invalid function argument - host");	
+	return 0;
+}
+
+sub removeHostPhysicalNicFromDvs
+{
+	my ($self, $host, $vmnic) = @_;
+	
+	if( $host->isa("vEasy::HostSystem") )
+	{
+		my $member = $self->checkIfHostIsMemberOfTheDvs($host);
+		if( $member )
+		{
+			if( $member->backing )
+			{
+				if( $member->backing->pnicSpec )
+				{
+					my $pnic_specs = $member->backing->pnicSpec;
+
+					@$pnic_specs = grep { $_->{pnicDevice} ne $vmnic } @$pnic_specs;
+					
+					my $pnic_backing = DistributedVirtualSwitchHostMemberPnicBacking->new(pnicSpec => $pnic_specs);
+
+					my $member_config_spec = DistributedVirtualSwitchHostMemberConfigSpec->new(backing => $pnic_backing, host => $host->getView(), operation => "edit");		
+					
+					my $spec = VMwareDVSConfigSpec->new(host => [$member_config_spec]);
+					
+					return $self->configure($spec);
+				}
+			}
+			$self->addCustomFault("No uplinks added from this host.");	
+			return 0;		
+		}
+		$self->addCustomFault("Host is not a member in this DVS.");	
+		return 0;		
+	}
+	$self->addCustomFault("Invalid function argument - host");	
+	return 0;
+}
+
+1;
