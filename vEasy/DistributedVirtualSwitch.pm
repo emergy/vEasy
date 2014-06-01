@@ -127,6 +127,22 @@ sub getDistributedVirtualPortgroups
 	return \@dvportgroups;
 }
 
+sub getNetworkResourcePoolKeyByName
+{
+	my ($self, $name) = @_;
+	
+	my $pools = $self->getView()->networkResourcePool;
+
+	my @pool = grep { $_->{name} eq $name} @$pools;
+	
+	if( @pool )
+	{
+		return $pool[0]->key;
+	}
+	$self->addCustomFault("NetworkResourcePool does not exist - $name.");
+	return 0;	
+}
+
 sub getContactPersonName
 {
 	my ($self) = @_;
