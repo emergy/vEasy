@@ -105,7 +105,7 @@ sub getConfigProperty
 	{
 		return $self->getView()->config->{$propertyname};
 	}
-	$self->addCustomFault("Propery not set - $propertyname.");
+	$self->addCustomFault("Property not set - $propertyname.");
 	return 0;	
 }
 
@@ -284,7 +284,7 @@ sub removeFromNetworkResourcePool
 	return $self->configure($spec);
 }
 
-sub setVlanToNone
+sub setVlanTypeToNone
 {
 	my ($self) = @_;
 	
