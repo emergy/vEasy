@@ -198,7 +198,7 @@ sub getPowerState
 {
 	my ($self) = @_;
 	
-	return $self->{view}->runtime->powerState->val;
+	return $self->getView()->runtime->powerState->val;
 }
 
 sub getPowerOnDate
