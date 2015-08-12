@@ -68,8 +68,12 @@ sub new
 	
 	my $self = $class->SUPER::new($vim, $arg, "VmwareDistributedVirtualSwitch" );
 	
-	bless ($self, $class);
-	return $self;
+	if( $self )
+	{
+		bless ($self, $class);
+		return $self;
+	}
+	return 0;
 }
 
 # Destructor
@@ -474,6 +478,28 @@ sub setContactInformation
 	
 	return $self->configure($spec);
 }
+
+sub setAmountOfUplinks
+{
+	my ($self, $amount, $prefix) = @_;
+	
+	if( not $prefix )
+	{
+		$prefix = "Uplink";
+	}
+	
+	my $name_array = [];
+	for( my $i = 1; $i <= $amount; ++$i )
+	{
+		push(@$name_array, "$prefix$i");
+	}
+	
+	my $uplink_policy = DVSNameArrayUplinkPortPolicy->new(uplinkPortName => $name_array);
+	my $spec = VMwareDVSConfigSpec->new(uplinkPortPolicy => $uplink_policy);
+	
+	return $self->configure($spec);
+}
+
 
 sub addHostToDvs
 {
