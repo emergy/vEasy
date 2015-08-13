@@ -1002,6 +1002,27 @@ sub addVmxnet3NetworkAdapter
 	return $self->addNetworkAdapter($adapter);
 }
 
+sub changeNetworkAdapterPortgroup
+{
+	my ($self, $device, $network) = @_;
+	
+	my $adapter = $self->getVirtualDevice($device);
+
+	if( $adapter )
+	{
+		my $backing_info = $self->generateNetworkAdapterBackingInfo($network);
+		
+		$adapter->{backing} = $backing_info;
+		my $config_spec_operation = VirtualDeviceConfigSpecOperation->new('edit');
+		my $vm_dev_spec = VirtualDeviceConfigSpec->new(device => $adapter, operation => $config_spec_operation);
+		my $vm_conf_spec = VirtualMachineConfigSpec->new(deviceChange => [ $vm_dev_spec ] );
+
+		return $self->configure($vm_conf_spec);
+	}
+	$self->addCustomFault("Device not found - $device.");
+	return 0;
+}
+
 sub setVirtualDiskMode
 {
 	my ($self, $diskname, $independent, $persistent) = @_;

@@ -626,4 +626,31 @@ sub disableVmkInterfaceForVsan
 	return 0;	
 }
 
+sub migrateVmkInterfaceToDistributedVirtualPortgroup
+{
+	my ($self, $vmk, $network) = @_;
+	
+	if( $network->isa("vEasy::DistributedVirtualPortgroup") )
+	{
+		my $port_connection = DistributedVirtualSwitchPortConnection->new(portgroupKey => $network->getKey(), switchUuid => $network->getDistributedVirtualSwitch()->getUuid());
+		
+		my $vmknic_spec = HostVirtualNicSpec->new(distributedVirtualPort => $port_connection);
+		eval
+		{	
+			my $netsys = $self->{host}->vim()->getViewFromMoRef($self->{host}->getView()->configManager->networkSystem);
+			$netsys->UpdateVirtualNic(device => $vmk, nic => $vmknic_spec);
+		};
+		my $fault = vEasy::Fault->new($@);
+		if( $fault )
+		{
+			$self->{host}->addFault($fault);
+			return 0;
+		}
+		return 1;
+	}
+	$self->addCustomFault("Invalid function argument - portgroup");
+	return 0;
+}
+
+
 1;
