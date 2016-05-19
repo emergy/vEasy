@@ -259,6 +259,34 @@ sub getVirtualMachine
 	return vEasy::VirtualMachine->new($self, $arg);	
 }
 
+sub getClusters
+{
+    my ($self) = @_;
+    my $cl_list = $self->{vim}->find_entity_views(view_type => 'ClusterComputeResource');
+    my @cluster_list;
+
+    foreach my $cl (@$cl_list) {
+        my $cluster = vEasy::Cluster->new($self->{vim}, $cl);
+        push @cluster_list, $cluster;
+    }
+
+    return \@cluster_list;
+}
+
+sub getDatacenters
+{
+    my ($self) = @_;
+    my $dc_list = $self->{vim}->find_entity_views(view_type => 'Datacenter');
+    my @datacenter_list;
+
+    foreach my $dc (@$dc_list) {
+        my $datacenter = vEasy::Datacenter->new($self->{vim}, $dc);
+        push @datacenter_list, $datacenter;
+    }
+
+    return \@datacenter_list;
+}
+
 # ============================================================================================
 # Fault Handling 
 # ============================================================================================
