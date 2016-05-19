@@ -43,7 +43,7 @@
 #			VirtualApp in VMware vSphere infrastructure.
 #
 # vEasy Documentation
-# https://github.com/aaremiz/vEasy/wiki
+# https://github.com/emergy/vEasy/wiki
 #
 # VMware vSphere API Reference:
 # https://www.vmware.com/support/developer/vc-sdk/

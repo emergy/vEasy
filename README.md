@@ -8,7 +8,7 @@ vEasy is automation framework for VMware vSphere infrastructure. It utilizes the
 
 vEasy is still incomplete and not extensively tested. You should not run it in production systems yet.
 
-See [Documentation](https://github.com/aaremiz/vEasy/wiki/) and [Quick Start Guide](https://github.com/aaremiz/vEasy/wiki/QuickStartGuide) for more info.
+See [Documentation](https://github.com/emergy/vEasy/wiki/) and [Quick Start Guide](https://github.com/emergy/vEasy/wiki/QuickStartGuide) for more info.
 
 Design Principals
 -----------------
@@ -43,10 +43,10 @@ Documentation
 Before you start to use vEasy it is recommended that you read VMware vSphere SDK for Perl programming guide (check the link below) to get the basic knowledge about VMware vSphere API and terminology used in it. 
 
 #####vEasy Documentation
-https://github.com/aaremiz/vEasy/wiki
+https://github.com/emergy/vEasy/wiki
 
 #####vEasy Examples
-https://github.com/aaremiz/vEasy-Examples
+https://github.com/emergy/vEasy-Examples
 
 #####VMware vSphere API Reference:
 https://www.vmware.com/support/developer/vc-sdk/
