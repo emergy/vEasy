@@ -265,7 +265,7 @@ sub getClusters
     my @cluster_list;
 
     foreach my $cl (@$cl_list) {
-        my $cluster = vEasy::Cluster->new($self->{vim}, $cl);
+        my $cluster = vEasy::Cluster->new($self, $cl);
         push @cluster_list, $cluster;
     }
 
@@ -279,7 +279,7 @@ sub getDatacenters
     my @datacenter_list;
 
     foreach my $dc (@$dc_list) {
-        my $datacenter = vEasy::Datacenter->new($self->{vim}, $dc);
+        my $datacenter = vEasy::Datacenter->new($self, $dc);
         push @datacenter_list, $datacenter;
     }
 
