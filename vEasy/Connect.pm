@@ -84,6 +84,11 @@ sub new
 {
 	my ($class, $address, $username, $password) = @_;
 
+    my $visdkrc = readVisdkrc();
+    $address  ||= $visdkrc->{VI_SERVER};
+    $username ||= $visdkrc->{VI_USERNAME};
+    $password ||= $visdkrc->{VI_PASSWORD};
+
 	my $vimobj = Vim->new(service_url => "https://$address/sdk");
 	my $si = 0;
 	
@@ -340,6 +345,25 @@ sub addCustomFault
 	
 	my $fault = vEasy::Fault->new($message);
 	return $self->addFault($fault);
+}
+
+sub readVisdkrc
+{
+    my $visdkrc = {};
+    my $visdkrc_file = $ENV{HOME} . "/.visdkrc";
+
+    if (-e $visdkrc_file) {
+        if (open my $visdkrc_h, "<", $visdkrc_file) {
+            while (<$visdkrc_h>) {
+                if (/^VI_/) {
+                    chomp;
+                    my ($key, $val) = split(/\s*=\s*/);
+                    $visdkrc->{$key} = $val;
+                }
+            }
+        }
+    }
+    return $visdkrc;
 }
 
 1;
