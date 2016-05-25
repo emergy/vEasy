@@ -132,7 +132,7 @@ sub getResourcePool
 {
 	my ($self) = @_;
 	
-	return vEasy::ResourcePool->new($self->vim(), $self->getView()->resourcePool);
+	return vEasy::ResourcePool->new($self->vim(), $self->getView()->resourcePool());
 }
 
 sub getCluster
@@ -590,14 +590,25 @@ sub migrate
 
 	if( $host->isa("vEasy::HostSystem") )
 	{	
-		if( not $rp or not $rp->isa("vEasy::ResourcePool") )
-		{
-			$rp = $self->getResourcePool();
-		}
+#  		if( not $rp or not $rp->isa("vEasy::ResourcePool") )
+#  		{
+#  			$rp = $self->getResourcePool();
+#  		}
 		my $task = 0;
 		eval
 		{
-			$task = $self->{view}->MigrateVM_Task(host => $host->getView(), pool => $rp->getView(), priority => VirtualMachineMovePriority->new('highPriority'));
+            if ($rp) {
+                $task = $self->{view}->MigrateVM_Task(
+                    host => $host->getView(),
+                    pool => $rp->getView(), # crash if VM in vApp
+                    priority => VirtualMachineMovePriority->new('highPriority'),
+                );
+            } else {
+                $task = $self->{view}->MigrateVM_Task(
+                    host => $host->getView(),
+                    priority => VirtualMachineMovePriority->new('highPriority'),
+                );
+            }
 		};
 		my $fault = vEasy::Fault->new($@);
 		if( $fault )
